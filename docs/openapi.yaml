@@ -1,0 +1,536 @@
+openapi: 3.0.3
+info:
+  title: StockFlow API
+  version: 1.0.0
+  description: >-
+    API REST para administrar productos y movimientos de inventario del
+    proyecto formativo StockFlow.
+  contact:
+    name: Andres Felipe Avendaño Lopez
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Servidor local de desarrollo
+tags:
+  - name: Sistema
+  - name: Productos
+  - name: Inventario
+  - name: Movimientos
+paths:
+  /health:
+    get:
+      tags: [Sistema]
+      summary: Comprobar disponibilidad
+      operationId: getHealth
+      responses:
+        "200":
+          description: Servicio disponible
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /products:
+    get:
+      tags: [Productos]
+      summary: Listar y filtrar productos
+      operationId: listProducts
+      parameters:
+        - name: q
+          in: query
+          description: Texto parcial de SKU, nombre o categoría.
+          schema:
+            type: string
+          example: teclado
+        - name: category
+          in: query
+          description: Categoría exacta, sin distinguir mayúsculas.
+          schema:
+            type: string
+          example: Periféricos
+        - name: status
+          in: query
+          description: Estado calculado del inventario.
+          schema:
+            type: string
+            enum: [available, low, out]
+      responses:
+        "200":
+          description: Colección de productos
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, count]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Product"
+                  count:
+                    type: integer
+                    minimum: 0
+    post:
+      tags: [Productos]
+      summary: Crear un producto
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+            example:
+              sku: MON-001
+              name: Monitor 24 pulgadas
+              description: Monitor Full HD con conexión HDMI.
+              category: Monitores
+              quantity: 7
+              minStock: 2
+              unitPrice: 620000
+      responses:
+        "201":
+          description: Producto creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /products/summary:
+    get:
+      tags: [Inventario]
+      summary: Consultar indicadores del inventario
+      operationId: getInventorySummary
+      responses:
+        "200":
+          description: Resumen calculado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InventorySummary"
+  /products/categories:
+    get:
+      tags: [Productos]
+      summary: Consultar categorías registradas
+      operationId: listCategories
+      responses:
+        "200":
+          description: Categorías únicas ordenadas alfabéticamente
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, count]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: string
+                  count:
+                    type: integer
+                    minimum: 0
+  /products/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
+    get:
+      tags: [Productos]
+      summary: Consultar un producto
+      operationId: getProductById
+      responses:
+        "200":
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Product"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Productos]
+      summary: Actualizar un producto
+      description: Se aceptan uno o varios campos; los valores omitidos se conservan.
+      operationId: updateProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductPatch"
+      responses:
+        "200":
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    patch:
+      tags: [Productos]
+      summary: Actualizar parcialmente un producto
+      operationId: patchProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductPatch"
+            example:
+              minStock: 6
+              unitPrice: 190000
+      responses:
+        "200":
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      tags: [Productos]
+      summary: Eliminar un producto
+      operationId: deleteProduct
+      responses:
+        "204":
+          description: Producto eliminado; no retorna contenido.
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /products/{id}/movements:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
+    get:
+      tags: [Movimientos]
+      summary: Consultar movimientos de un producto
+      operationId: listProductMovements
+      responses:
+        "200":
+          description: Historial ordenado del más reciente al más antiguo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovementList"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: [Movimientos]
+      summary: Registrar una entrada o salida
+      description: Actualiza las existencias y crea el historial en una operación atómica.
+      operationId: createMovement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovementInput"
+            examples:
+              entrada:
+                value:
+                  type: entry
+                  quantity: 5
+                  note: Compra a proveedor OC-1042
+              salida:
+                value:
+                  type: exit
+                  quantity: 2
+                  note: Entrega del pedido PV-205
+      responses:
+        "201":
+          description: Movimiento registrado y producto actualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message, data]
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    required: [movement, product]
+                    properties:
+                      movement:
+                        $ref: "#/components/schemas/Movement"
+                      product:
+                        $ref: "#/components/schemas/Product"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Existencias insuficientes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: AppError
+                code: INSUFFICIENT_STOCK
+                message: No hay existencias suficientes para registrar la salida.
+                details:
+                  availableQuantity: 4
+                  requestedQuantity: 9
+                requestId: 74066c49-eaa0-4b49-b03a-0e7d41644410
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /movements:
+    get:
+      tags: [Movimientos]
+      summary: Consultar todos los movimientos
+      operationId: listMovements
+      parameters:
+        - name: productId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [entry, exit]
+        - name: from
+          in: query
+          description: Fecha/hora inicial inclusiva, formato ISO 8601.
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: Fecha/hora final inclusiva, formato ISO 8601.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Movimientos filtrados
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovementList"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+components:
+  parameters:
+    ProductId:
+      name: id
+      in: path
+      required: true
+      description: Identificador UUID del producto.
+      schema:
+        type: string
+        format: uuid
+      example: 2b911fd4-ce85-43fb-a5a1-a7de2554d16b
+  responses:
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: Conflicto con el estado actual o SKU duplicado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ValidationError:
+      description: Datos de entrada o filtros inválidos
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Health:
+      type: object
+      required: [status, service, version]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        service:
+          type: string
+          example: stockflow-api
+        version:
+          type: string
+          example: 1.0.0
+    ProductInput:
+      type: object
+      required: [sku, name, category, quantity, minStock, unitPrice]
+      properties:
+        sku:
+          type: string
+          pattern: "^[A-Z0-9][A-Z0-9-]{2,19}$"
+          example: TEC-003
+        name:
+          type: string
+          minLength: 3
+          maxLength: 80
+        description:
+          type: string
+          maxLength: 240
+        category:
+          type: string
+          minLength: 3
+          maxLength: 40
+        quantity:
+          type: integer
+          minimum: 0
+        minStock:
+          type: integer
+          minimum: 0
+        unitPrice:
+          type: number
+          minimum: 0
+    ProductPatch:
+      type: object
+      minProperties: 1
+      properties:
+        sku:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        quantity:
+          type: integer
+          minimum: 0
+        minStock:
+          type: integer
+          minimum: 0
+        unitPrice:
+          type: number
+          minimum: 0
+    Product:
+      allOf:
+        - $ref: "#/components/schemas/ProductInput"
+        - type: object
+          required: [id, status, createdAt, updatedAt]
+          properties:
+            id:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [available, low, out]
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+    ProductResponse:
+      type: object
+      required: [message, data]
+      properties:
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/Product"
+    MovementInput:
+      type: object
+      required: [type, quantity]
+      properties:
+        type:
+          type: string
+          enum: [entry, exit]
+        quantity:
+          type: integer
+          minimum: 1
+        note:
+          type: string
+          maxLength: 160
+    Movement:
+      allOf:
+        - $ref: "#/components/schemas/MovementInput"
+        - type: object
+          required:
+            - id
+            - productId
+            - productSku
+            - productName
+            - previousQuantity
+            - currentQuantity
+            - createdAt
+          properties:
+            id:
+              type: string
+              format: uuid
+            productId:
+              type: string
+              format: uuid
+            productSku:
+              type: string
+            productName:
+              type: string
+            previousQuantity:
+              type: integer
+              minimum: 0
+            currentQuantity:
+              type: integer
+              minimum: 0
+            createdAt:
+              type: string
+              format: date-time
+    MovementList:
+      type: object
+      required: [data, count]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Movement"
+        count:
+          type: integer
+          minimum: 0
+    InventorySummary:
+      type: object
+      required: [totalProducts, totalUnits, inventoryValue, lowStock, outOfStock]
+      properties:
+        totalProducts:
+          type: integer
+          minimum: 0
+        totalUnits:
+          type: integer
+          minimum: 0
+        inventoryValue:
+          type: number
+          minimum: 0
+        lowStock:
+          type: integer
+          minimum: 0
+        outOfStock:
+          type: integer
+          minimum: 0
+    Error:
+      type: object
+      required: [error, code, message, requestId]
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          nullable: true
+        requestId:
+          type: string
+          format: uuid
