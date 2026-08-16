@@ -1,0 +1,9 @@
+EVIDENCIA: GA7-220501096-AA5-EV03
+PROYECTO: StockFlow API — servicios web de inventario
+APRENDIZ: Andres Felipe Avendaño Lopez
+FICHA: 3235904
+
+URL DEL REPOSITORIO REMOTO:
+https://github.com/afal875-ai/stockflow-api-inventario
+
+Repositorio público publicado y verificado el 16 de agosto de 2026.
