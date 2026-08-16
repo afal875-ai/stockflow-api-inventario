@@ -1,0 +1,166 @@
+{
+  "info": {
+    "_postman_id": "7815e195-08ba-4e57-bc93-f75fef9933c8",
+    "name": "StockFlow API - GA7-220501096-AA5-EV03",
+    "description": "Colección de servicios web de productos y movimientos de inventario.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "productId", "value": "2b911fd4-ce85-43fb-a5a1-a7de2554d16b" }
+  ],
+  "item": [
+    {
+      "name": "Sistema",
+      "item": [
+        {
+          "name": "Estado de la API",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Listar productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "Buscar y filtrar productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?q=teclado&status=available",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "q", "value": "teclado" },
+                { "key": "status", "value": "available" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consultar producto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}"] }
+          }
+        },
+        {
+          "name": "Crear producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('productId', pm.response.json().data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"MON-001\",\n  \"name\": \"Monitor 24 pulgadas\",\n  \"description\": \"Monitor Full HD con conexión HDMI.\",\n  \"category\": \"Monitores\",\n  \"quantity\": 7,\n  \"minStock\": 2,\n  \"unitPrice\": 620000\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"minStock\": 6,\n  \"unitPrice\": 190000\n}" },
+            "url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}"] }
+          }
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventario",
+      "item": [
+        {
+          "name": "Resumen de inventario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/products/summary", "host": ["{{baseUrl}}"], "path": ["products", "summary"] }
+          }
+        },
+        {
+          "name": "Categorías",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/products/categories", "host": ["{{baseUrl}}"], "path": ["products", "categories"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Movimientos",
+      "item": [
+        {
+          "name": "Registrar entrada",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"entry\",\n  \"quantity\": 5,\n  \"note\": \"Compra a proveedor OC-1042\"\n}" },
+            "url": { "raw": "{{baseUrl}}/products/{{productId}}/movements", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}", "movements"] }
+          }
+        },
+        {
+          "name": "Registrar salida",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"exit\",\n  \"quantity\": 2,\n  \"note\": \"Entrega del pedido PV-205\"\n}" },
+            "url": { "raw": "{{baseUrl}}/products/{{productId}}/movements", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}", "movements"] }
+          }
+        },
+        {
+          "name": "Historial por producto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/products/{{productId}}/movements", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}", "movements"] }
+          }
+        },
+        {
+          "name": "Listar movimientos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/movements", "host": ["{{baseUrl}}"], "path": ["movements"] }
+          }
+        }
+      ]
+    }
+  ]
+}
