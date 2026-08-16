@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Catálogo de servicios web de StockFlow API." />
+    <title>StockFlow | Documentación API</title>
+    <style>
+      :root { color-scheme: light; --ink:#172033; --muted:#657089; --line:#dce2ec; --blue:#3157d5; --bg:#f5f7fb; }
+      * { box-sizing:border-box; }
+      body { margin:0; font-family:Inter,system-ui,sans-serif; color:var(--ink); background:var(--bg); line-height:1.55; }
+      header { padding:48px max(24px,calc((100% - 1080px)/2)); color:white; background:linear-gradient(120deg,#16213d,#3157d5); }
+      header a { color:white; }
+      header p { max-width:700px; color:#dce5ff; }
+      main { max-width:1080px; margin:0 auto; padding:32px 24px 64px; }
+      h1 { margin:0 0 8px; font-size:clamp(2rem,5vw,3.4rem); }
+      h2 { margin-top:36px; }
+      .meta,.endpoint { background:white; border:1px solid var(--line); border-radius:14px; }
+      .meta { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:18px; padding:22px; }
+      .meta small { display:block; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+      .endpoints { display:grid; gap:12px; }
+      .endpoint { display:grid; grid-template-columns:78px minmax(230px,1fr) 2fr; align-items:center; gap:16px; padding:15px 18px; }
+      .method { border-radius:8px; padding:5px 8px; color:white; background:var(--blue); text-align:center; font:700 .78rem ui-monospace,monospace; }
+      .post { background:#14845f; } .put,.patch { background:#a15c00; } .delete { background:#bd3347; }
+      code { font-family:ui-monospace,SFMono-Regular,monospace; font-size:.88rem; overflow-wrap:anywhere; }
+      .endpoint span:last-child { color:var(--muted); }
+      .links { display:flex; gap:12px; flex-wrap:wrap; margin-top:24px; }
+      .button { display:inline-block; padding:10px 15px; border-radius:9px; color:white; background:var(--blue); text-decoration:none; }
+      .button.secondary { color:var(--blue); background:white; border:1px solid var(--line); }
+      @media (max-width:720px) { .endpoint { grid-template-columns:70px 1fr; } .endpoint span:last-child { grid-column:1/-1; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="/">← Volver al inventario</a>
+      <h1>StockFlow API</h1>
+      <p>Servicios REST para administrar productos, consultar indicadores y registrar entradas o salidas de inventario.</p>
+      <div class="links">
+        <a class="button" href="/docs/openapi.yaml">Descargar OpenAPI 3.0</a>
+        <a class="button secondary" href="/docs/DOCUMENTACION_SERVICIOS.md">Documentación técnica</a>
+      </div>
+    </header>
+    <main>
+      <section class="meta" aria-label="Información de la API">
+        <div><small>Versión</small><strong>1.0.0</strong></div>
+        <div><small>Ruta base</small><code>/api/v1</code></div>
+        <div><small>Formato</small><strong>JSON / UTF-8</strong></div>
+        <div><small>Estado</small><strong>Disponible</strong></div>
+      </section>
+
+      <h2>Catálogo de servicios</h2>
+      <div class="endpoints">
+        <article class="endpoint"><b class="method">GET</b><code>/health</code><span>Comprueba la disponibilidad del servicio.</span></article>
+        <article class="endpoint"><b class="method">GET</b><code>/products</code><span>Lista, busca y filtra productos.</span></article>
+        <article class="endpoint"><b class="method">GET</b><code>/products/{id}</code><span>Consulta un producto por identificador.</span></article>
+        <article class="endpoint"><b class="method post">POST</b><code>/products</code><span>Registra una nueva referencia.</span></article>
+        <article class="endpoint"><b class="method put">PUT</b><code>/products/{id}</code><span>Actualiza uno o varios datos del producto.</span></article>
+        <article class="endpoint"><b class="method patch">PATCH</b><code>/products/{id}</code><span>Actualiza parcialmente un producto.</span></article>
+        <article class="endpoint"><b class="method delete">DELETE</b><code>/products/{id}</code><span>Elimina una referencia del catálogo.</span></article>
+        <article class="endpoint"><b class="method">GET</b><code>/products/summary</code><span>Calcula indicadores consolidados.</span></article>
+        <article class="endpoint"><b class="method">GET</b><code>/products/categories</code><span>Devuelve las categorías registradas.</span></article>
+        <article class="endpoint"><b class="method post">POST</b><code>/products/{id}/movements</code><span>Registra una entrada o salida de unidades.</span></article>
+        <article class="endpoint"><b class="method">GET</b><code>/products/{id}/movements</code><span>Consulta el historial de una referencia.</span></article>
+        <article class="endpoint"><b class="method">GET</b><code>/movements</code><span>Consulta y filtra todos los movimientos.</span></article>
+      </div>
+    </main>
+  </body>
+</html>
