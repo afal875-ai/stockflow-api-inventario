@@ -1,0 +1,29 @@
+{
+  "name": "stockflow-inventario",
+  "version": "2.0.0",
+  "description": "API REST de productos y movimientos de inventario para la evidencia GA7-220501096-AA5-EV03.",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "inventario",
+    "express",
+    "sena",
+    "adso"
+  ],
+  "author": "Andres Felipe Avendaño Lopez",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.36.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
