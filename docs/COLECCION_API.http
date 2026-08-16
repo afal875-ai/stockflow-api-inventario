@@ -1,0 +1,80 @@
+@baseUrl = http://localhost:3000/api/v1
+@productId = 2b911fd4-ce85-43fb-a5a1-a7de2554d16b
+
+### 1. Estado de la API
+GET {{baseUrl}}/health
+Accept: application/json
+
+### 2. Listar productos
+GET {{baseUrl}}/products
+Accept: application/json
+
+### 3. Buscar y filtrar productos
+GET {{baseUrl}}/products?q=teclado&category=Periféricos&status=available
+Accept: application/json
+
+### 4. Resumen del inventario
+GET {{baseUrl}}/products/summary
+Accept: application/json
+
+### 5. Categorías registradas
+GET {{baseUrl}}/products/categories
+Accept: application/json
+
+### 6. Consultar producto por ID
+GET {{baseUrl}}/products/{{productId}}
+Accept: application/json
+
+### 7. Crear producto
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "sku": "MON-001",
+  "name": "Monitor 24 pulgadas",
+  "description": "Monitor Full HD con conexión HDMI.",
+  "category": "Monitores",
+  "quantity": 7,
+  "minStock": 2,
+  "unitPrice": 620000
+}
+
+### 8. Actualizar parcialmente un producto
+PATCH {{baseUrl}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "unitPrice": 190000,
+  "minStock": 6
+}
+
+### 9. Registrar entrada de inventario
+POST {{baseUrl}}/products/{{productId}}/movements
+Content-Type: application/json
+
+{
+  "type": "entry",
+  "quantity": 5,
+  "note": "Compra a proveedor OC-1042"
+}
+
+### 10. Registrar salida de inventario
+POST {{baseUrl}}/products/{{productId}}/movements
+Content-Type: application/json
+
+{
+  "type": "exit",
+  "quantity": 2,
+  "note": "Entrega correspondiente al pedido PV-205"
+}
+
+### 11. Historial de un producto
+GET {{baseUrl}}/products/{{productId}}/movements
+Accept: application/json
+
+### 12. Movimientos filtrados
+GET {{baseUrl}}/movements?type=entry&productId={{productId}}
+Accept: application/json
+
+### 13. Reemplace productId por el ID de un producto creado para probar eliminación
+DELETE {{baseUrl}}/products/{{productId}}
